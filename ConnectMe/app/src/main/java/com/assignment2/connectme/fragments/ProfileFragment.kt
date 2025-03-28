@@ -1,15 +1,18 @@
 package com.assignment2.connectme.fragments
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.assignment2.connectme.R
 import com.assignment2.connectme.adapters.PhotoAdapter
 import com.assignment2.connectme.databinding.FragmentProfileBinding
+import com.assignment2.connectme.extra.EditProfile
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.squareup.picasso.Picasso
@@ -32,6 +35,9 @@ class ProfileFragment : Fragment() {
         return binding.root
 
     }
+
+
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -60,6 +66,12 @@ class ProfileFragment : Fragment() {
                 binding.bioText.text = bio
             }
         }
+        // on click edit_pencil open edit profile
+        binding.editPencil.setOnClickListener {
+            val intent = Intent(activity, EditProfile::class.java)
+            startActivity(intent)
+        }
+
 
         // List of 7 drawable photos
         val photos = listOf(
