@@ -10,6 +10,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.assignment2.connectme.R
 import com.assignment2.connectme.adapters.PhotoAdapter
 import com.assignment2.connectme.databinding.FragmentProfileBinding
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
+import com.squareup.picasso.Picasso
 
 class ProfileFragment : Fragment() {
 
@@ -32,6 +35,31 @@ class ProfileFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        //update the pfp, name_text, bio_text by the one from the link in the firebase database
+// Get the current user from Firebase Authentication
+        val user = FirebaseAuth.getInstance().currentUser
+        user?.let {
+            val userId = it.uid
+            // Update the profile picture, name, and bio from the Firebase database
+            val database = FirebaseDatabase.getInstance().reference.child("users").child(userId)
+
+            database.child("profileImageUrl").get().addOnSuccessListener { snapshot ->
+                val profilePictureUrl = snapshot.value.toString()
+                // Load the profile picture using an image loading library like Picasso
+                Picasso.get().load(profilePictureUrl).into(binding.pfp)
+            }
+
+            database.child("name").get().addOnSuccessListener { snapshot ->
+                val name = snapshot.value.toString()
+                binding.nameText.text = name
+            }
+
+            database.child("bio").get().addOnSuccessListener { snapshot ->
+                val bio = snapshot.value.toString()
+                binding.bioText.text = bio
+            }
+        }
 
         // List of 7 drawable photos
         val photos = listOf(
