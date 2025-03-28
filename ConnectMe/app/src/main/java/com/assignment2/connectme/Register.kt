@@ -18,6 +18,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.assignment2.connectme.databinding.ActivityRegisterBinding
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 
 class Register : AppCompatActivity() {
     val binding by lazy {
@@ -49,11 +51,31 @@ class Register : AppCompatActivity() {
 
                 Toast.makeText(this@Register, "Please fill all the fields", Toast.LENGTH_SHORT).show()
             } else {
-                // Navigate to MainActivity
-                Toast.makeText(this@Register, "Registration Successful!", Toast.LENGTH_SHORT).show()
+            // Register the user in Firebase Authentication
+                val email = emailField.text.toString()
+                val password = passwordField.text.toString()
+                val name = nameField.text.toString()
 
-                val intent = Intent(this@Register, Home::class.java)
-                startActivity(intent)
+                FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(this) { task ->
+                        if (task.isSuccessful) {
+                            // Save the user's name in the Firebase Database
+                            val userId = FirebaseAuth.getInstance().currentUser?.uid
+                            val database = FirebaseDatabase.getInstance().reference
+                            val user = mapOf("name" to name, "email" to email)
+                            userId?.let {
+                                database.child("users").child(it).setValue(user)
+                            }
+
+                            // Registration success, navigate to Home Activity
+                            Toast.makeText(this@Register, "Registration Successful!", Toast.LENGTH_SHORT).show()
+                            val intent = Intent(this@Register, Home::class.java)
+                            startActivity(intent)
+                        } else {
+                            // If registration fails, display a message to the user.
+                            Toast.makeText(this@Register, "Registration Failed: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                        }
+                    }
             }
         }
 
