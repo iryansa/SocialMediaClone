@@ -15,6 +15,8 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.google.firebase.auth.FirebaseAuth
+
 // this is to denote the login page
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,9 +38,21 @@ class MainActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
             else{
-                // Navigate to Home Activity
-                val intent = Intent(this@MainActivity, Home::class.java)
-                startActivity(intent)
+            // Authenticate the user
+                val email = usernameField.text.toString()
+                val password = passwordField.text.toString()
+
+                FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(this) { task ->
+                        if (task.isSuccessful) {
+                            // Sign in success, navigate to Home Activity
+                            val intent = Intent(this@MainActivity, Home::class.java)
+                            startActivity(intent)
+                        } else {
+                            // If sign in fails, display a message to the user.
+                            Toast.makeText(this@MainActivity, "Authentication Failed.", Toast.LENGTH_SHORT).show()
+                        }
+                    }
             }
         }
 
