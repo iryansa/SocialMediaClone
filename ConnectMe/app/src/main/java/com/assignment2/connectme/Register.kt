@@ -42,6 +42,7 @@ class Register : AppCompatActivity() {
         val emailField = findViewById<EditText>(R.id.r_email)
         val passwordField = findViewById<EditText>(R.id.r_pass)
 
+
         registerBtn.setOnClickListener {
             if (nameField.text.toString().isEmpty() ||
                 usernameField.text.toString().isEmpty() ||
@@ -51,33 +52,50 @@ class Register : AppCompatActivity() {
 
                 Toast.makeText(this@Register, "Please fill all the fields", Toast.LENGTH_SHORT).show()
             } else {
-            // Register the user in Firebase Authentication
+                // Get user input
                 val email = emailField.text.toString()
                 val password = passwordField.text.toString()
                 val name = nameField.text.toString()
+                val username = usernameField.text.toString()
+                val phone = phoneField.text.toString()
 
+                // Register user in Firebase Authentication
                 FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password)
                     .addOnCompleteListener(this) { task ->
                         if (task.isSuccessful) {
-                            // Save the user's name in the Firebase Database
                             val userId = FirebaseAuth.getInstance().currentUser?.uid
                             val database = FirebaseDatabase.getInstance().reference
-                            val user = mapOf("name" to name, "email" to email)
+                            //toast to  show the user id
+                            Toast.makeText(this@Register, "User ID: $userId", Toast.LENGTH_SHORT).show()
+                            // Dummy bio and profile image
+                            val user = mapOf(
+                                "name" to name,
+                                "username" to username,
+                                "phone" to phone,
+                                "email" to email,
+                                "bio" to "Hey there! I'm using ConnectMe.",
+                                "profileImageUrl" to "https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg" // Placeholder image
+                            )
+
                             userId?.let {
                                 database.child("users").child(it).setValue(user)
+                                    .addOnCompleteListener { dbTask ->
+                                        if (dbTask.isSuccessful) {
+                                            Toast.makeText(this@Register, "Registration Successful!", Toast.LENGTH_SHORT).show()
+                                            val intent = Intent(this@Register, Home::class.java)
+                                            startActivity(intent)
+                                        } else {
+                                            Toast.makeText(this@Register, "Failed to save profile: ${dbTask.exception?.message}", Toast.LENGTH_SHORT).show()
+                                        }
+                                    }
                             }
-
-                            // Registration success, navigate to Home Activity
-                            Toast.makeText(this@Register, "Registration Successful!", Toast.LENGTH_SHORT).show()
-                            val intent = Intent(this@Register, Home::class.java)
-                            startActivity(intent)
                         } else {
-                            // If registration fails, display a message to the user.
                             Toast.makeText(this@Register, "Registration Failed: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
                         }
                     }
             }
         }
+
 
 
         val LoginTextView = findViewById<TextView>(R.id.loginLink)
