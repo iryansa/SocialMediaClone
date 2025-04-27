@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toolbar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -32,7 +33,7 @@ class UploadPosts : AppCompatActivity() {
         setSupportActionBar(findViewById(R.id.toolbarUpload))
         supportActionBar?.setDisplayShowTitleEnabled(false)
 
-        findViewById<TextView>(R.id.toolbarUpload).apply {
+        findViewById<androidx.appcompat.widget.Toolbar>(R.id.toolbarUpload).apply {
             setOnClickListener {
                 finish() // close when cross button clicked
             }

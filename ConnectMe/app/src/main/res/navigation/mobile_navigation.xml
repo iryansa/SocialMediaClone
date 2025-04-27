@@ -14,11 +14,11 @@
         android:name="com.assignment2.connectme.fragments.SearchFragment"
         android:label="fragment_search"
         tools:layout="@layout/fragment_search" />
-    <dialog
-        android:id="@+id/add"
-        android:name="com.assignment2.connectme.fragments.AddFragment"
-        android:label="fragment_add"
-        tools:layout="@layout/fragment_add" />
+<!--    <dialog-->
+<!--        android:id="@+id/add"-->
+<!--        android:name="com.assignment2.connectme.fragments.AddFragment"-->
+<!--        android:label="fragment_add"-->
+<!--        tools:layout="@layout/fragment_add" />-->
     <fragment
         android:id="@+id/profile"
         android:name="com.assignment2.connectme.fragments.ProfileFragment"
