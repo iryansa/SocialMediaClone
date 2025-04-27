@@ -1,6 +1,7 @@
 package com.assignment2.connectme.network
 
 import com.assignment2.connectme.model.GetUserProfileResponse
+import com.assignment2.connectme.models.Users
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.Call
@@ -76,5 +77,11 @@ interface ApiService {
     fun getUserProfile(
         @Field("userId") userId: Int
     ): Call<GetUserProfileResponse>
+
+    @FormUrlEncoded
+    @POST("search_users.php")
+    fun searchUsers(
+        @Field("searchText") searchText: String
+    ): Call<List<Users>>
 
 }

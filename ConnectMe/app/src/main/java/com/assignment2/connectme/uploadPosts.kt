@@ -34,7 +34,7 @@ class UploadPosts : AppCompatActivity() {
         supportActionBar?.setDisplayShowTitleEnabled(false)
 
         findViewById<androidx.appcompat.widget.Toolbar>(R.id.toolbarUpload).apply {
-            setOnClickListener {
+            findViewById<ImageView>(R.id.buttonClose).setOnClickListener {
                 finish() // close when cross button clicked
             }
         }
