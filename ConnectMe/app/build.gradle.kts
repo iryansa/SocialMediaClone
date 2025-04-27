@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.google.gms.google.services)
+    id("org.jetbrains.kotlin.kapt") // add this line
 }
 
 android {
@@ -46,6 +47,10 @@ dependencies {
     implementation(libs.converter.gson)
 // OkHttp for logging network requests (optional)
     implementation(libs.logging.interceptor)
+
+    implementation(libs.glide)
+    kapt(libs.glide.compiler)
+
     implementation(libs.circleimageview)
     implementation(libs.picasso)
     implementation(libs.androidx.core.ktx)

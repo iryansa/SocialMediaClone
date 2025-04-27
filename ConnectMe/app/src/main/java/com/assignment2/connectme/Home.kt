@@ -29,7 +29,17 @@ class Home : AppCompatActivity() {
         val navController = findNavController(R.id.nav_host_fragment_activity_home)
 
         navView.setupWithNavController(navController)
-
+//        navView.setOnItemSelectedListener { item ->
+//            when (item.itemId) {
+//                R.id.add -> {
+//                    // Open UploadPostsActivity
+//                    val intent = Intent(this, UploadPosts::class.java)
+//                    startActivity(intent)
+//                    true
+//                }
+//                else -> false
+//            }
+//        }
         // Add long click listener for the "Profile" button
         navView.findViewById<View>(R.id.profile).setOnLongClickListener {
             val sessionManager = SessionManager(this)
