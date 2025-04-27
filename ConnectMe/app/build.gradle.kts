@@ -41,7 +41,11 @@ android {
 }
 
 dependencies {
-
+    // Retrofit dependencies
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+// OkHttp for logging network requests (optional)
+    implementation(libs.logging.interceptor)
     implementation(libs.circleimageview)
     implementation(libs.picasso)
     implementation(libs.androidx.core.ktx)

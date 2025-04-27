@@ -9,53 +9,70 @@ import android.text.method.LinkMovementMethod
 import android.text.style.ClickableSpan
 import android.text.style.StyleSpan
 import android.view.View
+import android.widget.Button
+import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import com.google.firebase.auth.FirebaseAuth
+import com.assignment2.connectme.network.ApiService
+import com.assignment2.connectme.network.LoginRequest
+import com.assignment2.connectme.network.LoginResponse
+import com.assignment2.connectme.network.RetrofitClient
+import com.assignment2.connectme.session.SessionManager
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
-// this is to denote the login page
 class MainActivity : AppCompatActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContentView(R.layout.activity_main)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
 
-        val loginBtn = findViewById<TextView>(R.id.loginButton)
-        val usernameField = findViewById<TextView>(R.id.l_uname)
-        val passwordField = findViewById<TextView>(R.id.l_pass)
+        val loginBtn = findViewById<Button>(R.id.loginButton)
+        val usernameField = findViewById<EditText>(R.id.l_uname)
+        val passwordField = findViewById<EditText>(R.id.l_pass)
+
         loginBtn.setOnClickListener {
-            if (usernameField.text.toString().isEmpty() || passwordField.text.toString().isEmpty()) {
-                Toast.makeText(this@MainActivity, "Please fill all the fields", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-            else{
-            // Authenticate the user
-                val email = usernameField.text.toString()
-                val password = passwordField.text.toString()
+            val identifier = usernameField.text.toString()  // Could be email or username
+            val password = passwordField.text.toString()
 
-                FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
-                    .addOnCompleteListener(this) { task ->
-                        if (task.isSuccessful) {
-                            // Sign in success, navigate to Home Activity
-                            val intent = Intent(this@MainActivity, Home::class.java)
-                            startActivity(intent)
+            if (identifier.isEmpty() || password.isEmpty()) {
+                Toast.makeText(this@MainActivity, "Please fill all the fields", Toast.LENGTH_SHORT).show()
+            } else {
+// Call login API
+                val apiService = RetrofitClient.instance
+
+                apiService.login(identifier, password).enqueue(object : Callback<LoginResponse> {
+                    override fun onResponse(call: Call<LoginResponse>, response: Response<LoginResponse>) {
+                        if (response.isSuccessful) {
+                            val loginResponse = response.body()
+                            if (loginResponse != null && loginResponse.status == "success") {
+                                // Store the user session (userId and email)
+                                val user = loginResponse.user
+                                user?.let {
+                                    val sessionManager = SessionManager(this@MainActivity)
+                                    sessionManager.saveUserSession(it.id, it.email)
+
+                                    // Navigate to Home Activity
+                                    val intent = Intent(this@MainActivity, Home::class.java)
+                                    startActivity(intent)
+                                    finish()  // Close the login activity
+                                }
+                            } else {
+                                Toast.makeText(this@MainActivity, loginResponse?.message ?: "Login failed", Toast.LENGTH_SHORT).show()
+                            }
                         } else {
-                            // If sign in fails, display a message to the user.
-                            Toast.makeText(this@MainActivity, "Authentication Failed.", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this@MainActivity, "Failed to login. Try again.", Toast.LENGTH_SHORT).show()
                         }
                     }
+
+                    override fun onFailure(call: Call<LoginResponse>, t: Throwable) {
+                        Toast.makeText(this@MainActivity, "Network Error: ${t.message}", Toast.LENGTH_SHORT).show()
+                    }
+                })
             }
         }
-
 
         val registerTextView = findViewById<TextView>(R.id.RegisterLinkText)
         val fullText = "Don't have an account? Register"

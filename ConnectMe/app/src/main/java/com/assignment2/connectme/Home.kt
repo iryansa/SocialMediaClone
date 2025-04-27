@@ -11,6 +11,7 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.assignment2.connectme.databinding.ActivityHomeBinding
+import com.assignment2.connectme.session.SessionManager
 import com.google.firebase.auth.FirebaseAuth
 
 class Home : AppCompatActivity() {
@@ -31,7 +32,8 @@ class Home : AppCompatActivity() {
 
         // Add long click listener for the "Profile" button
         navView.findViewById<View>(R.id.profile).setOnLongClickListener {
-            FirebaseAuth.getInstance().signOut()
+            val sessionManager = SessionManager(this)
+            sessionManager.logout()
 
             Toast.makeText(this, "Logged out successfully", Toast.LENGTH_SHORT).show()
             val intent = Intent(this, MainActivity::class.java)

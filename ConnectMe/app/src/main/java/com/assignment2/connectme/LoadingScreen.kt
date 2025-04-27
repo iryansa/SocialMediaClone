@@ -7,6 +7,7 @@ import android.os.Looper
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import com.assignment2.connectme.session.SessionManager
 import com.google.firebase.auth.FirebaseAuth
 
 class LoadingScreen : AppCompatActivity() {
@@ -27,13 +28,27 @@ class LoadingScreen : AppCompatActivity() {
 
         // Check authentication after animation starts
         Handler(Looper.getMainLooper()).postDelayed({
-            val user = FirebaseAuth.getInstance().currentUser
-            if (user != null) {
-                startActivity(Intent(this, Home::class.java))
+//            val user = FirebaseAuth.getInstance().currentUser
+//            if (user != null) {
+//                startActivity(Intent(this, Home::class.java))
+//            } else {
+//                startActivity(Intent(this, MainActivity::class.java))
+//            }
+
+            val sessionManager = SessionManager(this)
+
+            if (sessionManager.isLoggedIn()) {
+                // User is already logged in → go to Home
+                val intent = Intent(this, Home::class.java)
+                startActivity(intent)
+                finish()
             } else {
-                startActivity(Intent(this, MainActivity::class.java))
+                // User is not logged in → go to Login
+                val intent = Intent(this, MainActivity::class.java)
+                startActivity(intent)
+                finish()
             }
-            finish()
+
         }, 2000) // Adjust delay as needed
     }
 

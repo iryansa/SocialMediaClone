@@ -17,14 +17,17 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import com.assignment2.connectme.databinding.ActivityRegisterBinding
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.FirebaseDatabase
+import com.assignment2.connectme.network.ApiService
+import com.assignment2.connectme.network.SignupRequest
+import com.assignment2.connectme.network.SignupResponse
+import com.assignment2.connectme.network.RetrofitClient
+import com.assignment2.connectme.session.SessionManager
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class Register : AppCompatActivity() {
-    val binding by lazy {
-        ActivityRegisterBinding.inflate(layoutInflater)
-    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -38,75 +41,97 @@ class Register : AppCompatActivity() {
         val registerBtn = findViewById<Button>(R.id.registerbtn)
         val nameField = findViewById<EditText>(R.id.r_name)
         val usernameField = findViewById<EditText>(R.id.r_uname)
-        val phoneField = findViewById<EditText>(R.id.r_phone)
         val emailField = findViewById<EditText>(R.id.r_email)
         val passwordField = findViewById<EditText>(R.id.r_pass)
 
-
         registerBtn.setOnClickListener {
-            if (nameField.text.toString().isEmpty() ||
-                usernameField.text.toString().isEmpty() ||
-                phoneField.text.toString().isEmpty() ||
-                emailField.text.toString().isEmpty() ||
-                passwordField.text.toString().isEmpty()) {
+            val name = nameField.text.toString().trim()
+            val username = usernameField.text.toString().trim()
+            val email = emailField.text.toString().trim()
+            val password = passwordField.text.toString().trim()
 
+            if (name.isEmpty() || username.isEmpty() || email.isEmpty() || password.isEmpty()) {
                 Toast.makeText(this@Register, "Please fill all the fields", Toast.LENGTH_SHORT).show()
-            } else {
-                // Get user input
-                val email = emailField.text.toString()
-                val password = passwordField.text.toString()
-                val name = nameField.text.toString()
-                val username = usernameField.text.toString()
-                val phone = phoneField.text.toString()
+                return@setOnClickListener
+            }
+// Don't create SignupRequest object anymore
+// val signupRequest = SignupRequest(username, name, email, password)
 
-                // Register user in Firebase Authentication
-                FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password)
-                    .addOnCompleteListener(this) { task ->
-                        if (task.isSuccessful) {
-                            val userId = FirebaseAuth.getInstance().currentUser?.uid
-                            val database = FirebaseDatabase.getInstance().reference
-                            //toast to  show the user id
-                            Toast.makeText(this@Register, "User ID: $userId", Toast.LENGTH_SHORT).show()
-                            // Dummy bio and profile image
-                            val user = mapOf(
-                                "name" to name,
-                                "username" to username,
-                                "phone" to phone,
-                                "email" to email,
-                                "bio" to "Hey there! I'm using ConnectMe.",
-                                "profileImageUrl" to "https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg" // Placeholder image
-                            )
+// Make the network call to your signup API
+            val apiService = RetrofitClient.instance
 
-                            userId?.let {
-                                database.child("users").child(it).setValue(user)
-                                    .addOnCompleteListener { dbTask ->
-                                        if (dbTask.isSuccessful) {
-                                            Toast.makeText(this@Register, "Registration Successful!", Toast.LENGTH_SHORT).show()
-                                            val intent = Intent(this@Register, Home::class.java)
-                                            startActivity(intent)
-                                        } else {
-                                            Toast.makeText(this@Register, "Failed to save profile: ${dbTask.exception?.message}", Toast.LENGTH_SHORT).show()
-                                        }
-                                    }
+            apiService.signup(username, name, email, password)
+                .enqueue(object : Callback<SignupResponse> {
+                    override fun onResponse(call: Call<SignupResponse>, response: Response<SignupResponse>) {
+                        if (response.isSuccessful) {
+                            val signupResponse = response.body()
+
+                            if (signupResponse?.status == "success") {
+                                // Show success toast
+                                Toast.makeText(this@Register, signupResponse.message, Toast.LENGTH_SHORT).show()
+
+                                // Navigate to Home Activity
+                                val intent = Intent(this@Register, MainActivity::class.java)
+                                startActivity(intent)
+                                finish() // (optional) finish Register Activity
+                            } else {
+                                // Show error message from server
+                                Toast.makeText(this@Register, signupResponse?.message ?: "Signup failed", Toast.LENGTH_SHORT).show()
                             }
                         } else {
-                            Toast.makeText(this@Register, "Registration Failed: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this@Register, "Signup failed. Try again.", Toast.LENGTH_SHORT).show()
                         }
                     }
-            }
+
+                    override fun onFailure(call: Call<SignupResponse>, t: Throwable) {
+                        Toast.makeText(this@Register, "Network error: ${t.message}", Toast.LENGTH_SHORT).show()
+                    }
+                })
         }
+//            // Create Signup request object
+//            val signupRequest = SignupRequest(username, name, email, password)
+//
+//            // Make the network call to your signup API
+//            val apiService = RetrofitClient.instance
+//            apiService.signup(signupRequest).enqueue(object : Callback<SignupResponse> {
+//                override fun onResponse(call: Call<SignupResponse>, response: Response<SignupResponse>) {
+//                    if (response.isSuccessful) {
+//                        val signupResponse = response.body()
+//
+//                        if (signupResponse?.status == "success") {
+//                            // Show success toast
+//                            Toast.makeText(this@Register, signupResponse.message, Toast.LENGTH_SHORT).show()
+//
+//
+//                            // Navigate to Home Activity
+//                            val intent = Intent(this@Register, MainActivity::class.java)
+//                            startActivity(intent)
+//                            finish()
+//                        } else {
+//                            // Handle registration failure
+//                            Toast.makeText(this@Register, signupResponse?.message ?: "Registration failed", Toast.LENGTH_SHORT).show()
+//                        }
+//                    } else {
+//                        // Handle server error
+//                        Toast.makeText(this@Register, "Error: ${response.message()}", Toast.LENGTH_SHORT).show()
+//                    }
+//                }
+//
+//                override fun onFailure(call: Call<SignupResponse>, t: Throwable) {
+//                    // Handle network failure
+//                    Toast.makeText(this@Register, "Network error: ${t.message}", Toast.LENGTH_SHORT).show()
+//                }
+//            })
+//        }
 
-
-
+        // Login link
         val LoginTextView = findViewById<TextView>(R.id.loginLink)
         val fullText = "Already have an account? Login"
         val spannableString = SpannableString(fullText)
 
-        // Make "Register" bold
         val boldSpan = StyleSpan(Typeface.BOLD)
         val clickableSpan = object : ClickableSpan() {
             override fun onClick(widget: View) {
-                // Navigate to Register Activity
                 val intent = Intent(this@Register, MainActivity::class.java)
                 startActivity(intent)
             }

@@ -7,15 +7,22 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.Toast
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.assignment2.connectme.R
 import com.assignment2.connectme.adapters.PhotoAdapter
 import com.assignment2.connectme.databinding.FragmentProfileBinding
 import com.assignment2.connectme.extra.EditProfile
+import com.assignment2.connectme.model.GetUserProfileResponse
+import com.assignment2.connectme.network.RetrofitClient
+import com.assignment2.connectme.session.SessionManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.squareup.picasso.Picasso
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class ProfileFragment : Fragment() {
 
@@ -42,35 +49,40 @@ class ProfileFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        //update the pfp, name_text, bio_text by the one from the link in the firebase database
-// Get the current user from Firebase Authentication
-        val user = FirebaseAuth.getInstance().currentUser
-        user?.let {
-            val userId = it.uid
-            // Update the profile picture, name, and bio from the Firebase database
-            val database = FirebaseDatabase.getInstance().reference.child("users").child(userId)
+        val sessionManager = SessionManager(requireContext())
+        val userId = sessionManager.getUserId()
 
-            database.child("profileImageUrl").get().addOnSuccessListener { snapshot ->
-                val profilePictureUrl = snapshot.value.toString()
-                // Load the profile picture using an image loading library like Picasso
-                Picasso.get().load(profilePictureUrl).into(binding.pfp)
+        val apiService = RetrofitClient.instance
+        apiService.getUserProfile(userId).enqueue(object : Callback<GetUserProfileResponse> {
+            override fun onResponse(call: Call<GetUserProfileResponse>, response: Response<GetUserProfileResponse>) {
+                if (response.isSuccessful) {
+                    val user = response.body()?.user
+
+                    binding.nameText.text = user?.name ?: ""
+                    binding.bioText.text = user?.bio ?: ""
+
+                    if (!user?.profile_picture.isNullOrEmpty()) {
+                        val imageBytes = android.util.Base64.decode(user?.profile_picture, android.util.Base64.DEFAULT)
+                        val bitmap = android.graphics.BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+                        binding.pfp.setImageBitmap(bitmap)
+                    } else {
+                        binding.pfp.setImageResource(R.drawable.profile_man)
+                    }
+                } else {
+                    Toast.makeText(requireContext(), "Failed to load profile", Toast.LENGTH_SHORT).show()
+                }
             }
 
-            database.child("name").get().addOnSuccessListener { snapshot ->
-                val name = snapshot.value.toString()
-                binding.nameText.text = name
+            override fun onFailure(call: Call<GetUserProfileResponse>, t: Throwable) {
+                Toast.makeText(requireContext(), "Network Error: ${t.message}", Toast.LENGTH_SHORT).show()
             }
+        })
 
-            database.child("bio").get().addOnSuccessListener { snapshot ->
-                val bio = snapshot.value.toString()
-                binding.bioText.text = bio
-            }
-        }
-        // on click edit_pencil open edit profile
         binding.editPencil.setOnClickListener {
             val intent = Intent(activity, EditProfile::class.java)
             startActivity(intent)
         }
+
 
 
         // List of 7 drawable photos
