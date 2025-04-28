@@ -20,13 +20,12 @@
         android:gravity="center_vertical">
 
         <!-- Profile Image --><!-- Profile Image -->
-        <ImageView
-            android:id="@+id/profileImage"
+        <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/profileImage"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:src="@drawable/profile_man"
             android:scaleType="centerCrop"
-            android:background="@drawable/profile_circle_background"
             android:padding="2dp" />
 
         <!-- Username -->

@@ -3,6 +3,7 @@ package com.assignment2.connectme.fragments
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -45,7 +46,7 @@ class SearchFragment : Fragment() {
 
             override fun afterTextChanged(s: Editable?) {
                 s?.let {
-                    if (it.length >= 2) {
+                    if (it.length >= 0) {
                         searchUsers(it.toString())
                     }
                 }
@@ -58,16 +59,18 @@ class SearchFragment : Fragment() {
     private fun searchUsers(query: String) {
         val apiService = RetrofitClient.instance
         val call: Call<List<Users>> = apiService.searchUsers(query)
-
+        Log.d(call.request().toString(), "Search query: $query")
         call.enqueue(object : Callback<List<Users>> {
             override fun onResponse(call: Call<List<Users>>, response: Response<List<Users>>) {
                 if (response.isSuccessful) {
+                    Log.d("SearchFragment", "Response: ${response.body()}")
                     userAdapter.updateData(response.body() ?: emptyList())
                 }
             }
 
             override fun onFailure(call: Call<List<Users>>, t: Throwable) {
                 // Handle failure
+                Log.e("SearchFragment", "API call failed: ${t.message}")
             }
         })
     }

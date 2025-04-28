@@ -10,11 +10,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.assignment2.connectme.R
 import com.assignment2.connectme.models.Users
 import com.squareup.picasso.Picasso
+import de.hdodenhof.circleimageview.CircleImageView
 
 class UserAdapter(private var users: List<Users>) : RecyclerView.Adapter<UserAdapter.UserViewHolder>() {
 
     class UserViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val profileImage: ImageView = itemView.findViewById(R.id.profileImage)
+        val profileImage: CircleImageView = itemView.findViewById(R.id.profileImage)
         val username: TextView = itemView.findViewById(R.id.usernameText)
         val addButton: Button = itemView.findViewById(R.id.addFriendButton)
     }
@@ -30,8 +31,18 @@ class UserAdapter(private var users: List<Users>) : RecyclerView.Adapter<UserAda
         holder.username.text = user.username
 
         // Assuming profile_pic is a URL or base64 decoded
+if (!user.profile_pic.isNullOrEmpty()) {
+    try {
+        val imageBytes = android.util.Base64.decode(user.profile_pic, android.util.Base64.DEFAULT)
+        val bitmap = android.graphics.BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+        holder.profileImage.setImageBitmap(bitmap)
+    } catch (e: IllegalArgumentException) {
+        // If decoding fails, fallback to placeholder
         Picasso.get().load(user.profile_pic).placeholder(R.drawable.profile_man).into(holder.profileImage)
-
+    }
+} else {
+    holder.profileImage.setImageResource(R.drawable.profile_man)
+}
         holder.addButton.setOnClickListener {
             // Handle Add Friend Button click here
         }

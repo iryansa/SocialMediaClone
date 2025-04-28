@@ -81,7 +81,7 @@ interface ApiService {
     @FormUrlEncoded
     @POST("search_users.php")
     fun searchUsers(
-        @Field("searchText") searchText: String
+        @Field("query") searchText: String
     ): Call<List<Users>>
 
 }
