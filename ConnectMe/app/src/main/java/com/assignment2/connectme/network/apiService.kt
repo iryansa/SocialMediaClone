@@ -1,5 +1,6 @@
 package com.assignment2.connectme.network
 
+import com.assignment2.connectme.model.FollowRequest
 import com.assignment2.connectme.model.GetUserProfileResponse
 import com.assignment2.connectme.models.Users
 import okhttp3.MultipartBody
@@ -107,4 +108,35 @@ interface ApiService {
         val status: String,
         val message: String
     )
+
+    @FormUrlEncoded
+    @POST("unfollow.php")
+    fun unfollowUser(
+        @Field("follower_id") followerId: Int,
+        @Field("following_id") followingId: Int
+    ): Call<UnfollowResponse>
+
+    data class UnfollowResponse(
+        val status: String,
+        val message: String
+    )
+
+
+    @POST("getPendingRequests.php")
+    @FormUrlEncoded
+    fun getPendingRequests(@Field("user_id") userId: Int): Call<List<FollowRequest>>
+
+    @POST("acceptFollowRequest.php")
+    @FormUrlEncoded
+    fun acceptFollowRequest(@Field("request_id") requestId: Int): Call<FollowActionResponse>
+
+    @POST("rejectFollowRequest.php")
+    @FormUrlEncoded
+    fun rejectFollowRequest(@Field("request_id") requestId: Int): Call<FollowActionResponse>
+
+    data class FollowActionResponse(
+        val status: String,
+        val message: String
+    )
+
 }

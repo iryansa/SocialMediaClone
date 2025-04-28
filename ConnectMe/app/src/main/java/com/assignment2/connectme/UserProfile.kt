@@ -125,20 +125,30 @@ override fun onCreate(savedInstanceState: Bundle?) {
                     }
                 })
         }
-        // Uncomment this for Unfollow functionality later
-//    else if (buttonValue == "Unfollow") {
-//        apiService.unfollowUser(userId, newUserId).enqueue(object : Callback<ApiService.UnfollowResponse> {
-//            override fun onResponse(call: Call<ApiService.UnfollowResponse>, response: retrofit2.Response<ApiService.UnfollowResponse>) {
-//                if (response.isSuccessful) {
-//                    followButton.text = "Follow"
-//                }
-//            }
-//
-//            override fun onFailure(call: Call<ApiService.UnfollowResponse>, t: Throwable) {
-//                // Handle failure
-//            }
-//        })
-//    }
+        else if (buttonValue == "Unfollow") {
+            followButton.isEnabled = false
+            followButton.text = "Unfollowing..."
+
+            apiService.unfollowUser(userId, newUserId)
+                .enqueue(object : Callback<ApiService.UnfollowResponse> {
+                    override fun onResponse(
+                        call: Call<ApiService.UnfollowResponse>,
+                        response: retrofit2.Response<ApiService.UnfollowResponse>
+                    ) {
+                        if (response.isSuccessful) {
+                            followButton.text = "Follow"
+                        } else {
+                            followButton.text = "Unfollow"
+                        }
+                        followButton.isEnabled = true
+                    }
+
+                    override fun onFailure(call: Call<ApiService.UnfollowResponse>, t: Throwable) {
+                        followButton.text = "Unfollow"
+                        followButton.isEnabled = true
+                    }
+                })
+        }
 
     }
 }
