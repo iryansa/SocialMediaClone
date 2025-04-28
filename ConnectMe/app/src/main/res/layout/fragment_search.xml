@@ -44,15 +44,15 @@
             app:layout_constraintEnd_toEndOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- Recent Searches Text (Optional) -->
-    <TextView
-        android:id="@+id/recentsearches"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="Recent Searches:"
-        android:textStyle="bold|italic"
-        android:textSize="16sp" />
+<!--    &lt;!&ndash; Recent Searches Text (Optional) &ndash;&gt;-->
+<!--    <TextView-->
+<!--        android:id="@+id/recentsearches"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_marginTop="16dp"-->
+<!--        android:text="Recent Searches:"-->
+<!--        android:textStyle="bold|italic"-->
+<!--        android:textSize="16sp" />-->
 
     <!-- RecyclerView for Search Results -->
     <androidx.recyclerview.widget.RecyclerView

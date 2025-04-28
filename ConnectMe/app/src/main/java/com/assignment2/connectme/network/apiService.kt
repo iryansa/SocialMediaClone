@@ -84,4 +84,27 @@ interface ApiService {
         @Field("query") searchText: String
     ): Call<List<Users>>
 
+
+    @FormUrlEncoded
+    @POST("get_follow_status.php")
+    fun getFollowStatus(
+        @Field("follower_id") followerId: Int,
+        @Field("following_id") followingId: Int
+    ): Call<FollowStatusResponse>
+
+    data class FollowStatusResponse(
+        val status: String
+    )
+
+    @FormUrlEncoded
+    @POST("follow.php")
+    fun followUser(
+        @Field("follower_id") followerId: Int,
+        @Field("following_id") followingId: Int
+    ): Call<FollowResponse>
+
+    data class FollowResponse(
+        val status: String,
+        val message: String
+    )
 }
